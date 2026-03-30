@@ -23,10 +23,12 @@ spec:
             - name: mongo-data
               mountPath: /data/db
   volumeClaimTemplates:
-    - metadata:
-        name: mongo-data
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 5Gi
+  - metadata:
+      name: mongo-data
+    spec:
+      storageClassName: nfs-client
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
