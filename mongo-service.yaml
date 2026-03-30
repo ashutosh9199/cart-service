@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-mongo
+  namespace: clahanstore
+spec:
+  selector:
+    app: cart-mongo
+  ports:
+    - port: 27017
+      targetPort: 27017
