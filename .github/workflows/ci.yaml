@@ -3,7 +3,7 @@ name: Cart Service CI Pipeline
 on:
   push:
     branches:
-      - main
+      - "*"
 
 jobs:
   build-and-scan:
