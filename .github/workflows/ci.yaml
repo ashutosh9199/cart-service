@@ -3,13 +3,15 @@ name: Cart Service CI Pipeline
 on:
   push:
     branches:
-      - "*"
+      - main
+      - pipeline-1   # include your working branch
 
 jobs:
   build-and-scan:
     runs-on: ubuntu-latest
 
     steps:
+    # ---------------- CHECKOUT ----------------
     - name: Checkout Code
       uses: actions/checkout@v3
 
@@ -22,19 +24,14 @@ jobs:
     - name: Install Dependencies
       run: npm install
 
-    # ---------------- SONAR CLOUD ----------------
+    # ---------------- SONARCLOUD ----------------
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
       with:
         args: >
           -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
           -Dsonar.organization=${{ secrets.SONAR_ORG }}
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-    - name: Sonar Quality Gate
-      uses: SonarSource/sonarcloud-quality-gate-action@master
-      timeout-minutes: 5
+          -Dsonar.qualitygate.wait=true
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
@@ -57,6 +54,7 @@ jobs:
     # ---------------- TRIVY SCAN ----------------
     - name: Install Trivy
       run: |
+        sudo apt-get update
         sudo apt-get install -y wget
         wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.1_Linux-64bit.deb
         sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
@@ -65,11 +63,12 @@ jobs:
       run: |
         trivy image --severity HIGH,CRITICAL --exit-code 0 ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
 
-    # ---------------- PUSH TO DOCKER HUB ----------------
+    # ---------------- DOCKER HUB LOGIN ----------------
     - name: Login to Docker Hub
       run: |
         echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+    # ---------------- PUSH IMAGE ----------------
     - name: Push Image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
