@@ -69,17 +69,24 @@ jobs:
                      -t ${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }} .
 
     # ---------------- TRIVY SCAN ----------------
-    - name: Install Trivy
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget
-        wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.1_Linux-64bit.deb
-        sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
+    # - name: Install Trivy
+    #   run: |
+    #     sudo apt-get update
+    #     sudo apt-get install -y wget
+    #     wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.1_Linux-64bit.deb
+    #     sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
 
-    - name: Scan Docker Image with Trivy
-      run: |
-        trivy image --severity HIGH,CRITICAL --exit-code 0 ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
+    # - name: Scan Docker Image with Trivy
+    #   run: |
+    #     trivy image --severity HIGH,CRITICAL --exit-code 0 ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
 
+    - name: Trivy Image Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: '${{ secrets.DOCKERHUB_USERNMAE }}/${{ ENV.IMAGE_NAME }}:${{ Steps.meta.outputs.tag }}'
+        Format: 'table'
+        severity: HIGH,CRITICAL
+        exit-code: '0'
     # ---------------- DOCKER HUB LOGIN ----------------
     - name: Login to Docker Hub
       run: |
