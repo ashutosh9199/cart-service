@@ -55,31 +55,35 @@ jobs:
     - name: Snyk Test (Dependency Scan)
       run: snyk test
 
-    # # ---------------- DOCKER BUILD ----------------
-    # - name: Build Docker Image
-    #   run: |
-    #     docker build -t ${{ secrets.DOCKER_USERNAME }}/cart-service:latest \
-    #                  -t ${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }} .
+  docker:
+    runs-on: ubuntu-latest
 
-    # # ---------------- TRIVY SCAN ----------------
-    # - name: Install Trivy
-    #   run: |
-    #     sudo apt-get update
-    #     sudo apt-get install -y wget
-    #     wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.1_Linux-64bit.deb
-    #     sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
+    steps:
+    # ---------------- DOCKER BUILD ----------------
+    - name: Build Docker Image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/cart-service:latest \
+                     -t ${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }} .
 
-    # - name: Scan Docker Image with Trivy
-    #   run: |
-    #     trivy image --severity HIGH,CRITICAL --exit-code 0 ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
+    # ---------------- TRIVY SCAN ----------------
+    - name: Install Trivy
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget
+        wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.1_Linux-64bit.deb
+        sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
 
-    # # ---------------- DOCKER HUB LOGIN ----------------
-    # - name: Login to Docker Hub
-    #   run: |
-    #     echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+    - name: Scan Docker Image with Trivy
+      run: |
+        trivy image --severity HIGH,CRITICAL --exit-code 0 ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
 
-    # # ---------------- PUSH IMAGE ----------------
-    # - name: Push Image
-    #   run: |
-    #     docker push ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
-    #     docker push ${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }}
+    # ---------------- DOCKER HUB LOGIN ----------------
+    - name: Login to Docker Hub
+      run: |
+        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    # ---------------- PUSH IMAGE ----------------
+    - name: Push Image
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }}
