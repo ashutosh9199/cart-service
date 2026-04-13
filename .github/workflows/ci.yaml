@@ -1,0 +1,99 @@
+name: Cart Service CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - pipeline-1   # include your working branch
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    # ---------------- CHECKOUT ----------------
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # ---------------- NODE SETUP ----------------
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install Dependencies
+      run: npm install
+
+    # ---------------- SONARCLOUD ----------------
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      with:
+        args: >
+          -Dsonar.projectKey=ashutosh9199_cart-service
+          -Dsonar.organization=ashutosh9199
+          #-Dsonar.qualitygate.wait=true
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  snyk:
+    runs-on: ubuntu-latest
+
+    steps:
+    # ---------------- SNYK ----------------
+    - name: Install Snyk
+      run: npm install -g snyk
+
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Snyk Auth
+      run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+    - name: Snyk Test (Dependency Scan)
+      run: snyk test
+
+  # docker:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+
+  #   - name: Checkout Code
+  #     uses: actions/checkout@v3
+  #   # ---------------- DOCKER BUILD ----------------
+  #   - name: Build Docker Image
+  #     run: |
+  #       docker build -t ${{ secrets.DOCKER_USERNAME }}/cart-service:latest \
+  #                    -t ${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }} .
+
+  #   # ---------------- TRIVY SCAN ----------------
+  #   # - name: Install Trivy
+  #   #   run: |
+  #   #     sudo apt-get update
+  #   #     sudo apt-get install -y wget
+  #   #     wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.1_Linux-64bit.deb
+  #   #     sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
+
+  #   # - name: Scan Docker Image with Trivy
+  #   #   run: |
+  #   #     trivy image --severity HIGH,CRITICAL --exit-code 0 ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
+
+  #   - name: Trivy Image Scan
+  #     uses: aquasecurity/trivy-action@master
+  #     with:
+  #       image-ref: '${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }}'
+  #       Format: 'table'
+  #       severity: HIGH,CRITICAL
+  #       exit-code: '0'
+  #   # ---------------- DOCKER HUB LOGIN ----------------
+  #   - name: Login to Docker Hub
+  #     run: |
+  #       echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+  #   # ---------------- PUSH IMAGE ----------------
+  #   - name: Push Image
+  #     run: |
+  #       docker push ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
+  #       docker push ${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }}
