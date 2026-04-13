@@ -59,6 +59,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v3
     # ---------------- DOCKER BUILD ----------------
     - name: Build Docker Image
       run: |
