@@ -34,16 +34,20 @@ jobs:
           #-Dsonar.qualitygate.wait=true
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        
-    # # ---------------- SNYK ----------------
-    # - name: Install Snyk
-    #   run: npm install -g snyk
 
-    # - name: Snyk Auth
-    #   run: snyk auth ${{ secrets.SNYK_TOKEN }}
+  snyk:
+    runs-on: ubuntu-latest
 
-    # - name: Snyk Test (Dependency Scan)
-    #   run: snyk test
+    steps:
+    # ---------------- SNYK ----------------
+    - name: Install Snyk
+      run: npm install -g snyk
+
+    - name: Snyk Auth
+      run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+    - name: Snyk Test (Dependency Scan)
+      run: snyk test
 
     # # ---------------- DOCKER BUILD ----------------
     # - name: Build Docker Image
