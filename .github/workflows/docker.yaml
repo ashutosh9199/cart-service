@@ -33,5 +33,4 @@ jobs:
     # ---------------- PUSH IMAGE ----------------
     - name: Push Image
       run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/cart-service:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/cart-service:${{ inputs.image_tag}}
