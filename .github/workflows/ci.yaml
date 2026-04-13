@@ -43,6 +43,9 @@ jobs:
     - name: Install Snyk
       run: npm install -g snyk
 
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
     - name: Snyk Auth
       run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
